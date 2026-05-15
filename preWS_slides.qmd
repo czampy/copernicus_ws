@@ -6,9 +6,14 @@ format: revealjs
 editor: visual
 ---
 
+Here there are a few things you will need to do before the workshop.
+In particular, you will be asked to:
+- register in the Copernicus Marine Services platform
+- intall all necessary libraries in RStudio (not mandatory)
+
 ## User registration
 
-Quarto enables you to weave together content and executable code into a finished presentation. To learn more about Quarto presentations see <https://quarto.org/docs/presentations/>.
+
 
 ## Prepare your R environment
 
