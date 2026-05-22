@@ -1,0 +1,8 @@
+---
+title: "Copernicus Marine Toolbox API"
+author: "Carlo Zampieri"
+format: html
+editor: visual
+---
+
+This document will give you a brief introduction on the Copernicus
