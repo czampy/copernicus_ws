@@ -1,8 +1,114 @@
 ---
 title: "Copernicus Marine Toolbox API"
 author: "Carlo Zampieri"
-format: html
+format:
+  html:
+    toc: true
+    embed-resources: true
 editor: visual
+engine: knitr
 ---
 
-This document will give you a brief introduction on the Copernicus
+This document will give you a brief introduction on the [Copernicus Marine Toolbox](https://help.marine.copernicus.eu/en/collections/9080063-copernicus-marine-toolbox), which is a Python package to browse and download products from the Copernicus Marine Data Store.
+
+::: callout-important
+The Copernicus Marine Toolbox can be used from the terminal or as a Python module. This document just give an introduction on how to run the toolbox functions in Python, but it does not explain how to get or use Python itself. For more information on Python visit the [official webpage](https://www.python.org/), or [this page](https://posit.co/blog/three-ways-to-program-in-python-with-rstudio) to know how to use Python within your RStudio environment.
+:::
+
+## Installation
+
+This tool is compatible with Windows, MacOS and Linux running Python v3.10 to v3.13.
+
+There are several ways to install the toolbox in your computer. Here we will see only the one using `pip`, but if you prefer another way, you can check the [complete installation tutorial](https://help.marine.copernicus.eu/en/articles/7970514-copernicus-marine-toolbox-installation).
+
+Type the following line in your terminal:
+
+```{bash eval=FALSE,echo=TRUE}
+python -m pip install copernicusmarine
+```
+
+To make sure the toolbox has been successfully installed, execute this line in your terminal:
+
+```{bash eval=FALSE,echo=TRUE}
+copernicusmarine --version
+```
+
+or these commands in your Python environment:
+
+```{python}
+#| eval: false
+#| echo: true
+import copernicusmarine
+copernicusmarine.__version__
+```
+
+## Credentials configuration
+
+As for downloading through the website, you need to login in your personal account. You can do that easily by using the `login` command in Python:
+
+```{python}
+#| eval: false
+#| echo: true
+import copernicusmarine
+copernicusmarine.login(
+  username="youruserid",
+  password="yourpassword")
+```
+
+::: callout-note
+**You need to login just once!**
+:::
+
+## Explore catalogue and metadata
+
+The function `describe` allows to explore the CMEMS catalogue and the metadata of the available products. For example:
+
+```{python}
+import copernicusmarine
+copernicusmarine.describe(
+  product_id="MEDSEA_MULTIYEAR_BGC_006_008",
+  disable_progress_bar=True
+  )
+```
+
+As you can see the output is a bit messy and you might prefer to use the Copernicus Marine Data Store webpage to explore the catalogue more easily.
+
+If you want to know more on the function `describe` and its usage, visit [this page](https://help.marine.copernicus.eu/en/articles/8286798-copernicus-marine-toolbox-api-explore-the-catalogue-and-metadata).
+
+## Subset and download
+
+The web interface for downloading data from the Copernicus Marine Data Store limits you at maximum 1GB files. To bypass this limit you can split the data you need in smaller chunks (for example by time or space) or use the Copernicus Marine Toolbox! The function `subset` allows you to subset and download the data you need without any size limit.
+
+For example, if I want to download the daily surface temperature of 2024 in the northern Adriatic Sea from the Mediterranean Sea Physics Reanalysis product, I will execute the following code:
+
+```{python}
+#| label: 1st-subset
+#| eval: false
+#| echo: true
+import copernicusmarine
+copernicusmarine.subset(
+  dataset_id = "cmems_mod_med_phy-temp_my_4.2km_P1D-m",
+  variables = ["thetao"],
+  minimum_longitude = 12,
+  maximum_longitude = 15.5,
+  minimum_latitude = 43.5,
+  maximum_latitude = 46,
+  start_datetime="2024-01-01T00:00:00",
+  end_datetime="2024-12-31T00:00:00",
+  minimum_depth=1.0182366371154785,
+  maximum_depth=1.0182366371154785,
+  output_directory = "C:Users/User/Download/",
+  output_filename = "nadr_sst_daily_2024.nc",
+  force_download = True
+)
+```
+
+::: callout-note
+To fill the arguments of the `describe` function you need to know the dataset id and other specs of the product from which you wish to download the data. I suggest to first explore the product and get an idea of what you need, by visiting the Copernicus Marine Data Store webpage.
+
+An easier way to know how to fill the function arguments is to select the dataset, variables, spatial and temporal extent in the data store webpage and then click on "Automate". A pop-up window will show you how to code the data request.
+
+![](images/clipboard-598654482.png){fig-align="center" width="753"}
+:::
+
+If you want to download data from multiple datasets in once, you can iterate the code shown above using a `for` loop as [in this file](../scripts/copernicus_toolbox.py).
