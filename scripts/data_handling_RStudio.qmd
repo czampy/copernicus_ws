@@ -3,8 +3,51 @@ title: "Handling data in RStudio"
 author: "Carlo Zampieri"
 format:
   html:
+    toc: true
     embed-resources: true
 editor: visual
 ---
 
-## 
+This tutorial gives you an example on how you can access and extract data from the files you download from the CMEMS.
+
+## The NetCDF-4 format
+
+The files you download from Copernicus are often in the format `NetCDF-4`. As described its official [documentation](https://docs.unidata.ucar.edu/netcdf-c/current/index.html), *"NetCDF is a set of software libraries and self-describing, machine-independent data formats that support the creation, access, and sharing of array-oriented scientific data"*. Imagine `NetCDF-4` as a multidimensional array (usually 3D) of data. In the case of the geo-referenced data you download from Copernicus, the array has 3 dimensions: two for longitude and latitude, and one for time or depth, or the combination of them. Common office software don't work with this format, but programming (R, Python, Matlab, etc.) and GIS (QGIS or ArcGIS) software allow to access and handle `NetCDF-4` with great potential. Let's see some example in RStudio to understand it better!
+
+## Packages and data
+
+```{r}
+#| message: false
+#| warning: false
+library(tidyr)
+library(dplyr)
+library(terra)
+library(sf)
+```
+
+```{r}
+sample_xy <- read.csv("../examples_data/sample.csv",dec = ".",sep = ";")
+head(sample_xy)
+```
+
+```{r}
+cmems_files <- list.files("../examples_data/",full.names = T,pattern = "cmems")
+cmems_files
+```
+
+## Load and explore CMEMS data
+
+```{r}
+cmems_data <- rast(cmems_files)
+cmems_data
+```
+
+```{r}
+varnames(cmems.data)
+time(cmems.data)
+names(cmems.data)
+```
+
+```{r}
+names(cmems.data) <- paste(gsub("_.*","",names(cmems.data)),time(cmems.data),sep = '_')
+```
