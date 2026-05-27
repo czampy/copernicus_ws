@@ -8,13 +8,15 @@ format:
 editor: visual
 ---
 
-This tutorial gives you an example on how you can access and extract data from the files you download from the CMEMS.
+This tutorial gives you an example on how you can access and extract data from the files you download from the CMEMS. All the data mentioned here are available in the [*examples_data*](https://github.com/czampy/copernicus_ws/tree/main/examples_data) folder of the GitHub repository.
 
 ## The NetCDF-4 format
 
 The files you download from Copernicus are often in the format `NetCDF-4`. As described its official [documentation](https://docs.unidata.ucar.edu/netcdf-c/current/index.html), *"NetCDF is a set of software libraries and self-describing, machine-independent data formats that support the creation, access, and sharing of array-oriented scientific data"*. Imagine `NetCDF-4` as a multidimensional array (usually 3D) of data. In the case of the geo-referenced data you download from Copernicus, the array has 3 dimensions: two for longitude and latitude, and one for time or depth, or the combination of them. Common office software don't work with this format, but programming (R, Python, Matlab, etc.) and GIS (QGIS or ArcGIS) software allow to access and handle `NetCDF-4` with great potential. Let's see some example in RStudio to understand it better!
 
-## Packages and data
+## Useful packages
+
+To work with NetCDF files we need to load some packages which contain useful functions:
 
 ```{r}
 #| message: false
@@ -25,29 +27,142 @@ library(terra)
 library(sf)
 ```
 
-```{r}
-sample_xy <- read.csv("../examples_data/sample.csv",dec = ".",sep = ";")
-head(sample_xy)
-```
+::: callout-note
+See the [pre-workshop slides](../slides/preWS_slides.html) to know how to install the required packages.
+:::
+
+## Load and explore CMEMS data
+
+For this tutorial we will use data that were downloaded form CMEMS. Particularly, we will use monthly data of surface temperature, salinity and concentration of chlorophyll available in the products [Mediterranean Sea Physics Reanalysis](https://doi.org/10.48670/mds-00375) and [Mediterranean Sea Biogeochemistry Reanalysis](https://doi.org/10.48670/mds-00374).
+
+We use the function `list.files()` to list the files in the folder *examples_data*, which present the word *cmems* in their names:
 
 ```{r}
 cmems_files <- list.files("../examples_data/",full.names = T,pattern = "cmems")
 cmems_files
 ```
 
-## Load and explore CMEMS data
+There are 3 files, one for each of the variables. We use the function `rast` from the `terra` package to load the files in RStudio as one object of class `SpatRaster`:
 
 ```{r}
 cmems_data <- rast(cmems_files)
 cmems_data
 ```
 
-```{r}
-varnames(cmems.data)
-time(cmems.data)
-names(cmems.data)
-```
+The `SpatRaster` object is like a 3D grid. The three dimensions are defined as *rows*, *columns* and *layers*. Rows and columns define a grid of cells across longitude and latitude, respectively. Layers are given by the product between the number of variables, time slices and depth slices. In our case, we have 3 variables (temperature, salinity and concentration of chlorophyll), 4 time slices (the files contain monthly data from June to September 2020), and just 1 depth slice since we are interested in surface variables - hence, we have a total of 12 layers. By calling the `cmems_data` object in which we loaded the CMEMS files, we get a description of the object features like the spatial and temporal resolution and extent, the variable names, the coordinate system, etc. (see the output above). There are specific functions to access and if necessary modify some of the raster features. `varnames()` shows the name of the variables. `time()` shows the time at which each layer refers to. `names()` shows the layers names.
 
 ```{r}
-names(cmems.data) <- paste(gsub("_.*","",names(cmems.data)),time(cmems.data),sep = '_')
+varnames(cmems_data)
+time(cmems_data)
+names(cmems_data)
+```
+
+Note that the layers names include the variable name, the depth slice, and the layer number (for example the first, the second, the third or the forth layer of the file). Layers names can be changed in order to be more informative, for example to show just the variable name and the time slice, as shown in the following box:
+
+```{r}
+names(cmems_data) <- paste(gsub("_.*","",names(cmems_data)),time(cmems_data),sep = '_')
+names(cmems_data)
+```
+
+We can also explore the data by plotting them with the function `plot()`:
+
+```{r}
+plot(cmems_data,main=names(cmems_data))
+```
+
+## Extract data by location and time
+
+It is common to want to extract the values for specific locations and times or time periods. The `sample.csv` file in the *example_data* folder reports a table with date and coordinates of 6 sampling events carried out in the Adriatic Sea. We use the functions `read.csv()` and `head()` to load and explore the file, respectively:
+
+```{r}
+sample_xy <- read.csv("../examples_data/sample.csv",dec = ".",sep = ";")
+head(sample_xy)
+```
+
+We can even plot the points over one the raster layers:
+
+```{r}
+#| message: false
+#| warning: false
+plot(cmems_data,1,main=names(cmems_data)[1])
+points(sample_xy$Lon,sample_xy$Lat,pch=16,add=TRUE)
+```
+
+The `extract()` function from the `terra` package allows to search into a raster the values of specific locations (expressed in coordinates):
+
+```{r}
+extract(cmems_data,sample_xy[,c(3,2)])
+```
+
+The function produced a table with the values for each point (rows) from each layer of the `cmems_data` object (columns). We can transpose the table to have a column for the layer name and one for the extracted values by using the function `pivot_longer()` (from the `tidyr` package). We concatenate the executions by using the pipe operator `%>%` implemented in the `dplyr` package:
+
+```{r}
+extract(cmems_data,sample_xy[,c(3,2)]) %>%
+  pivot_longer(cols = -1,names_to = "layer",values_to = "value")
+```
+
+To get a tidier table, we can also split the layer column into variable and date by using the function `separate()`:
+
+```{r}
+extract(cmems_data,sample_xy[,c(3,2)]) %>%
+  pivot_longer(cols = -1,names_to = "layer",values_to = "value") %>%
+  separate(layer,into = c("var","Date"),sep = "_")
+```
+
+We can take a further step and have a row for each combination of location and date, and a column for each variable. The `pivot_wider()` function helps with that:
+
+```{r}
+cmems_extr <- extract(cmems_data,sample_xy[,c(3,2)]) %>%
+  pivot_longer(cols = -1,names_to = "layer",values_to = "value") %>%
+  separate(layer,into = c("var","Date"),sep = "_") %>%
+  pivot_wider(id_cols = c(ID,Date),names_from = var,values_from = value)
+cmems_extr
+```
+
+At this point, we just need to select only the locations and dates reported in our `sample_xy` table. To do so, we need to add an ID column and to convert the date format in order to match the columns of the `cmems_extr` object. We use the `mutate()` function to modify the `sample_xy` object and the `left_join()` function to merge it with the extracted values:
+
+```{r}
+sample_xy2 <- sample_xy %>%
+  separate(Date,into = c("day","month","year"),sep = "/") %>% select(-day) %>%
+  mutate(ID = 1:nrow(sample_xy),Date = paste(year,month,"01",sep = "-"),.keep = "unused") %>%
+  left_join(cmems_extr,by = c("ID","Date"))
+sample_xy2
+```
+
+## Extract data by area
+
+A similar operation can be done also for extracting the mean value of a variable within a certain area. To do so, you need a `shapefile` of the area (or areas) you are interested in. In the *examples_data* folder there is the `shapefile` of 6 random coastal areas of the Adriatic Sea. The `vect()` function from the `terra` package allows to load `shapefile` in RStudio:
+
+```{r}
+sample_area <- vect("../examples_data/coastal_areas.shp")
+sample_area
+```
+
+Note that the coordinate reference system (*crs*) of this object differs form the one of `cmems_data`. To be able to extract data from the raster, the two objects must have the same *crs*. We have to re-project `sample_areas`:
+
+```{r}
+sample_area <- project(sample_area,cmems_data)
+```
+
+Now we can plot them together to see the result:
+
+```{r}
+plot(cmems_data,1,main=names(cmems_data)[1])
+plot(sample_area,add=TRUE)
+```
+
+Extracting the mean values for each area is now simple:
+
+```{r}
+extract(cmems_data,sample_area,fun=mean)
+```
+
+By concatenating multiple operations, as we did in the previous section, we can obtain a cleaner table:
+
+```{r}
+cmems_extr_area <- extract(cmems_data,sample_area,fun=mean) %>%
+  pivot_longer(cols = -1,names_to = "layer",values_to = "value") %>%
+  separate(layer,into = c("var","Date"),sep = "_") %>%
+  pivot_wider(id_cols = c(ID,Date),names_from = var,values_from = value)
+cmems_extr_area
 ```
