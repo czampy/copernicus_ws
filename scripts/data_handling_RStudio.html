@@ -7,6 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Carlo Zampieri">
+<meta name="dcterms.date" content="2026-05-28">
 
 <title>Handling data in RStudio</title>
 <style>
@@ -2234,6 +2235,12 @@ vertical-align: -.125em;
           </div>
   </div>
     
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">May 28, 2026</p>
+    </div>
+  </div>
   
     
   </div>
@@ -2274,7 +2281,7 @@ Note
 <section id="load-and-explore-cmems-data" class="level2">
 <h2 class="anchored" data-anchor-id="load-and-explore-cmems-data">Load and explore CMEMS data</h2>
 <p>For this tutorial we will use data that were downloaded form CMEMS. Particularly, we will use monthly data of surface temperature, salinity and concentration of chlorophyll available in the products <a href="https://doi.org/10.48670/mds-00375">Mediterranean Sea Physics Reanalysis</a> and <a href="https://doi.org/10.48670/mds-00374">Mediterranean Sea Biogeochemistry Reanalysis</a>.</p>
-<p>We use the function <code>list.files()</code> to list the files in the folder <em>examples_data</em>, which present the word <em>cmems</em> in their names:</p>
+<p>We use the function <code>list.files()</code><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> to list the files in the folder <em>examples_data</em>, which present the word <em>cmems</em> in their names:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>cmems_files <span class="ot">&lt;-</span> <span class="fu">list.files</span>(<span class="st">&quot;../examples_data/&quot;</span>,<span class="at">full.names =</span> T,<span class="at">pattern =</span> <span class="st">&quot;cmems&quot;</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>cmems_files</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -2352,7 +2359,7 @@ time        : 2020-06-01 to 2020-09-01 UTC </code></pre>
 </section>
 <section id="extract-data-by-location-and-time" class="level2">
 <h2 class="anchored" data-anchor-id="extract-data-by-location-and-time">Extract data by location and time</h2>
-<p>It is common to want to extract the values for specific locations and times or time periods. The <code>sample.csv</code> file in the <em>example_data</em> folder reports a table with date and coordinates of 6 sampling events carried out in the Adriatic Sea. We use the functions <code>read.csv()</code> and <code>head()</code> to load and explore the file, respectively:</p>
+<p>It is common to want to extract the values for specific locations and times or time periods. The <code>sample.csv</code> file in the <em>example_data</em> folder reports a table with date and coordinates of 6 sampling events carried out in the Adriatic Sea. We use the functions <code>read.csv()</code><a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> and <code>head()</code> to load and explore the file, respectively:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>sample_xy <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;../examples_data/sample.csv&quot;</span>,<span class="at">dec =</span> <span class="st">&quot;.&quot;</span>,<span class="at">sep =</span> <span class="st">&quot;;&quot;</span>)</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(sample_xy)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -2492,7 +2499,7 @@ time        : 2020-06-01 to 2020-09-01 UTC </code></pre>
 </section>
 <section id="extract-data-by-area" class="level2">
 <h2 class="anchored" data-anchor-id="extract-data-by-area">Extract data by area</h2>
-<p>A similar operation can be done also for extracting the mean value of a variable within a certain area. To do so, you need a <code>shapefile</code> of the area (or areas) you are interested in. In the <em>examples_data</em> folder there is the <code>shapefile</code> of 6 random coastal areas of the Adriatic Sea. The <code>vect()</code> function from the <code>terra</code> package allows to load <code>shapefile</code> in RStudio:</p>
+<p>A similar operation can be done also for extracting the mean value of a variable within a certain area. To do so, you need a <code>shapefile</code> of the area (or areas) you are interested in. In the <em>examples_data</em> folder there is the <code>shapefile</code> of 6 random coastal areas of the Adriatic Sea. The <code>vect()</code><a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> function from the <code>terra</code> package allows to load <code>shapefile</code> in RStudio:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>sample_area <span class="ot">&lt;-</span> <span class="fu">vect</span>(<span class="st">&quot;../examples_data/coastal_areas.shp&quot;</span>)</span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>sample_area</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -2579,7 +2586,15 @@ time        : 2020-06-01 to 2020-09-01 UTC </code></pre>
 </div>
 </section>
 
-</main>
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Note that the first argument of the function <code>list.files()</code> is the path of the folder where you saved the data. The path can be expressed as relative to your current working directory (as in the example), or to the root of your computer (e.g., “C:/Users/User/Download/”). To easily get the path to your folder, open it with the file explorer, click on the address bar on the top, select the path and copy-paste it in your code<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>Note that the first argument of <code>read.csv()</code> is a string of characters describing the path of the file. As for the <code>list.files()</code> function, the path can be written as relative to the working directory or to your computer root (<em>cfr.</em> footnote 1).<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Note that the first argument of the <code>vect()</code> function is the path to the <code>shapefile</code>. As per the <code>list.files()</code> and <code>read.csv()</code> functions, the path can be written as relative to the working directory or to your computer root (<em>cfr.</em> footnote 1).<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main>
 <!-- /main column -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
@@ -2668,6 +2683,11 @@ time        : 2020-06-01 to 2020-09-01 UTC </code></pre>
           if (link.dataset.originalHref !== undefined) {
             link.href = link.dataset.originalHref;
           }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
         }
       }
     function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {

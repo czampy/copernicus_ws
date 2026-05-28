@@ -1,10 +1,13 @@
 ---
 title: "Handling data in RStudio"
 author: "Carlo Zampieri"
+date: last-modified
 format:
   html:
     toc: true
     embed-resources: true
+    link-external-newwindow: true
+    footnotes-hover: true
 editor: visual
 ---
 
@@ -35,7 +38,9 @@ See the [pre-workshop slides](../slides/preWS_slides.html) to know how to instal
 
 For this tutorial we will use data that were downloaded form CMEMS. Particularly, we will use monthly data of surface temperature, salinity and concentration of chlorophyll available in the products [Mediterranean Sea Physics Reanalysis](https://doi.org/10.48670/mds-00375) and [Mediterranean Sea Biogeochemistry Reanalysis](https://doi.org/10.48670/mds-00374).
 
-We use the function `list.files()` to list the files in the folder *examples_data*, which present the word *cmems* in their names:
+We use the function `list.files()`[^1] to list the files in the folder *examples_data*, which present the word *cmems* in their names:
+
+[^1]: Note that the first argument of the function `list.files()` is the path of the folder where you saved the data. The path can be expressed as relative to your current working directory (as in the example), or to the root of your computer (e.g., "C:/Users/User/Download/"). To easily get the path to your folder, open it with the file explorer, click on the address bar on the top, select the path and copy-paste it in your code
 
 ```{r}
 cmems_files <- list.files("../examples_data/",full.names = T,pattern = "cmems")
@@ -72,7 +77,9 @@ plot(cmems_data,main=names(cmems_data))
 
 ## Extract data by location and time
 
-It is common to want to extract the values for specific locations and times or time periods. The `sample.csv` file in the *example_data* folder reports a table with date and coordinates of 6 sampling events carried out in the Adriatic Sea. We use the functions `read.csv()` and `head()` to load and explore the file, respectively:
+It is common to want to extract the values for specific locations and times or time periods. The `sample.csv` file in the *example_data* folder reports a table with date and coordinates of 6 sampling events carried out in the Adriatic Sea. We use the functions `read.csv()`[^2] and `head()` to load and explore the file, respectively:
+
+[^2]: Note that the first argument of `read.csv()` is a string of characters describing the path of the file. As for the `list.files()` function, the path can be written as relative to the working directory or to your computer root (*cfr.* footnote 1).
 
 ```{r}
 sample_xy <- read.csv("../examples_data/sample.csv",dec = ".",sep = ";")
@@ -131,7 +138,9 @@ sample_xy2
 
 ## Extract data by area
 
-A similar operation can be done also for extracting the mean value of a variable within a certain area. To do so, you need a `shapefile` of the area (or areas) you are interested in. In the *examples_data* folder there is the `shapefile` of 6 random coastal areas of the Adriatic Sea. The `vect()` function from the `terra` package allows to load `shapefile` in RStudio:
+A similar operation can be done also for extracting the mean value of a variable within a certain area. To do so, you need a `shapefile` of the area (or areas) you are interested in. In the *examples_data* folder there is the `shapefile` of 6 random coastal areas of the Adriatic Sea. The `vect()`[^3] function from the `terra` package allows to load `shapefile` in RStudio:
+
+[^3]: Note that the first argument of the `vect()` function is the path to the `shapefile`. As per the `list.files()` and `read.csv()` functions, the path can be written as relative to the working directory or to your computer root (*cfr.* footnote 1).
 
 ```{r}
 sample_area <- vect("../examples_data/coastal_areas.shp")
